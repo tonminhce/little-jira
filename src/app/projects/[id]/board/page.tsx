@@ -9,6 +9,8 @@ import { IssueBoardWrapper } from '@/components/issue/IssueBoardWrapper'
 import { Tabs } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { PageLayout } from '@/components/layout'
+import { Alert } from '@/components/ui/alert'
 import { LayoutGrid, List, Plus, ArrowLeft, Settings, BarChart3 } from 'lucide-react'
 
 interface BoardPageProps {
@@ -103,85 +105,67 @@ export default async function ProjectBoardPage({ params }: BoardPageProps) {
     { label: 'Dashboard', href: `/projects/${projectId}/dashboard`, icon: <BarChart3 className="w-4 h-4" /> },
   ]
 
+  const breadcrumbs = [
+    { label: project.team.name, href: `/teams/${project.teamId}` },
+    { label: project.name, href: `/projects/${projectId}` },
+  ]
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-6">
-            <Link href="/dashboard" className="text-xl font-bold text-gray-900">
-              Little Jira
-            </Link>
-            <nav className="flex gap-4">
-              <Link href="/dashboard" className="text-gray-600 hover:text-gray-900">
-                Dashboard
-              </Link>
-              <Link href="/teams" className="text-gray-600 hover:text-gray-900">
-                Teams
-              </Link>
-              <Link href={`/teams/${project.teamId}`} className="text-gray-600 hover:text-gray-900">
-                {project.team.name}
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+    <PageLayout breadcrumbs={breadcrumbs}>
+      {/* Back link */}
+      <Link
+        href={`/projects/${projectId}`}
+        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 mb-4"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back to Project
+      </Link>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back link */}
-        <Link
-          href={`/projects/${projectId}`}
-          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 mb-4"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Project
-        </Link>
-
-        {/* Project Header with Tabs */}
-        <Card className="mb-6">
-          <CardContent className="p-0">
-            <div className="p-6 flex justify-between items-center border-b">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
-                <p className="text-gray-500 text-sm mt-1">Kanban Board</p>
-              </div>
-              <div className="flex items-center gap-2">
-                {!isArchived && (
-                  <Link href={`/projects/${projectId}/issues/new`}>
-                    <Button>
-                      <Plus className="w-4 h-4 mr-2" />
-                      New Issue
-                    </Button>
-                  </Link>
-                )}
-                {canManage && (
-                  <Link href={`/projects/${projectId}/settings`}>
-                    <Button variant="secondary">
-                      <Settings className="w-4 h-4" />
-                    </Button>
-                  </Link>
-                )}
-              </div>
+      {/* Project Header with Tabs */}
+      <Card className="mb-6">
+        <CardContent className="p-0">
+          <div className="p-6 flex justify-between items-center border-b">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
+              <p className="text-gray-500 text-sm mt-1">Kanban Board</p>
             </div>
-            <Tabs tabs={tabs} />
-          </CardContent>
-        </Card>
-
-        {isArchived && (
-          <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 p-4 rounded mb-6">
-            This project is archived. Issues cannot be created or modified.
+            <div className="flex items-center gap-2">
+              {!isArchived && (
+                <Link href={`/projects/${projectId}/issues/new`}>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Issue
+                  </Button>
+                </Link>
+              )}
+              {canManage && (
+                <Link href={`/projects/${projectId}/settings`}>
+                  <Button variant="secondary">
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
-        )}
+          <Tabs tabs={tabs} />
+        </CardContent>
+      </Card>
 
-        <IssueBoardWrapper
-          projectId={projectId}
-          initialIssues={mappedIssues}
-          customColumns={customColumns}
-          labels={labels}
-          members={members}
-          isArchived={isArchived}
-          canManage={canManage}
-        />
-      </main>
-    </div>
+      {isArchived && (
+        <Alert variant="warning" className="mb-6">
+          This project is archived. Issues cannot be created or modified.
+        </Alert>
+      )}
+
+      <IssueBoardWrapper
+        projectId={projectId}
+        initialIssues={mappedIssues}
+        customColumns={customColumns}
+        labels={labels}
+        members={members}
+        isArchived={isArchived}
+        canManage={canManage}
+      />
+    </PageLayout>
   )
 }

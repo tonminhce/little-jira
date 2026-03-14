@@ -1,12 +1,21 @@
-import { auth } from '@/lib/auth'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 // Routes that don't require authentication
 const publicRoutes = ['/login', '/signup', '/reset-password', '/reset-password/confirm']
 
-export default auth((req) => {
+// Simple token check without heavy auth imports
+async function getSessionToken(req: NextRequest): Promise<string | undefined> {
+  // Check for session token in cookies (next-auth.jwt)
+  const sessionToken = req.cookies.get('next-auth.session-token')?.value ||
+    req.cookies.get('__Secure-next-auth.session-token')?.value
+  return sessionToken
+}
+
+export async function middleware(req: NextRequest) {
   const { nextUrl } = req
-  const isLoggedIn = !!req.auth
+  const sessionToken = await getSessionToken(req)
+  const isLoggedIn = !!sessionToken
 
   const isPublicRoute = publicRoutes.some((route) =>
     nextUrl.pathname.startsWith(route)
@@ -32,7 +41,7 @@ export default auth((req) => {
   }
 
   return NextResponse.next()
-})
+}
 
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico|public).*)'],

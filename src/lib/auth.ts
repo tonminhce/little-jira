@@ -112,6 +112,17 @@ export const config: NextAuthConfig = {
     maxAge: 24 * 60 * 60, // 24 hours
   },
   secret: process.env.NEXTAUTH_SECRET,
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
+  },
 }
 // console.log('Google Client ID:', process.env.GOOGLE_CLIENT_ID)
 export const { handlers, auth, signIn, signOut } = NextAuth(config)

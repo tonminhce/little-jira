@@ -1,0 +1,9 @@
+node_modules/
+.next/
+.env.local
+.env*.local
+.env
+_bmad/
+_output-md/
+.claude/
+design-artifacts/

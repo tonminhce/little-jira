@@ -1,12 +1,13 @@
-import { auth } from '@/lib/auth'
-import { NextResponse } from 'next/server'
+import { getToken } from 'next-auth/jwt'
+import { NextResponse, type NextRequest } from 'next/server'
 
 // Routes that don't require authentication
 const publicRoutes = ['/login', '/signup', '/reset-password', '/reset-password/confirm']
 
-export default auth((req) => {
+export async function middleware(req: NextRequest) {
   const { nextUrl } = req
-  const isLoggedIn = !!req.auth
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+  const isLoggedIn = !!token
 
   const isPublicRoute = publicRoutes.some((route) =>
     nextUrl.pathname.startsWith(route)
@@ -32,9 +33,8 @@ export default auth((req) => {
   }
 
   return NextResponse.next()
-})
+}
 
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico|public).*)'],
-  unstable_allowDynamic: ['**/node_modules/**', '**/lib/**'],
 }
